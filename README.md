@@ -4,6 +4,7 @@ This library was developed in response to difficulties encountered while using [
 - [Cargo-watch exhibits erratic performance on modern MacOS, potentially causing indefinite loops.](https://github.com/watchexec/cargo-watch/issues/242)
 - [Cargo-watch may loop endlessly when employed within complex Git repositories.](https://github.com/watchexec/cargo-watch/issues/241)
 - [Cargo-watch lacks support for certain `.gitignore` syntax, including negative patterns.](https://github.com/watchexec/watchexec/issues/166)
+- [Cargo-watch misconstrues certain syntax in the `.gitignore file`, leading to the erroneous monitoring of files that should be exempt.](https://github.com/watchexec/watchexec/issues/203) 
 
 <br/>
 
