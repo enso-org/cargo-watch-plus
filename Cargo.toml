@@ -1,7 +1,12 @@
 [package]
 name = "cargo-watch-plus"
-version = "1.0.0"
+version = "0.1.0"
 edition = "2021"
+description = "Cross-platform file watching library."
+license = "MIT"
+documentation = "https://github.com/enso-org/cargo-watch-plus"
+homepage = "https://github.com/enso-org/cargo-watch-plus"
+repository = "https://github.com/enso-org/cargo-watch-plus"
 
 [dependencies]
 home = "0.5.4"

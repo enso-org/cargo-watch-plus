@@ -1,7 +1,27 @@
 use std::env;
 use home::home_dir;
 use std::process::Command;
+use std::process::Child;
 use which::which;
+
+
+// ==================
+// === ChildGuard ===
+// ==================
+
+struct ChildGuard(Child);
+
+impl Drop for ChildGuard {
+    fn drop(&mut self) {
+        self.0.kill().ok();
+    }
+}
+
+
+
+// ============
+// === Main ===
+// ============
 
 fn main() {
     println!("cargo:rerun-if-changed=js");
@@ -21,9 +41,11 @@ fn main() {
     std::fs::create_dir(&crate_bin_js_path).unwrap();
     fs_extra::dir::copy(&js_sources, &crate_bin_js_path, &options).unwrap();
     env::set_current_dir(&crate_bin_js_path).unwrap();
-    let npm = which("npm").unwrap();
-    Command::new(npm)
+    let npm = which("npm").expect("Program 'npm' not found.");
+    let child = Command::new(npm)
         .arg("install")
-        .output()
+        .spawn()
         .expect("Failed to execute 'npm' command.");
+    let mut guard = ChildGuard(child);
+    guard.0.wait().unwrap();
 }

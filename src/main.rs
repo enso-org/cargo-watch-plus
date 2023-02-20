@@ -32,7 +32,7 @@ fn main() {
     env::set_current_dir(&crate_bin_js_path).unwrap();
     let mut args = vec!["run", "start", "--silent", "--", &cwd_str];
     args.extend(argv.iter().map(|t| t.as_str()).skip(2));
-    let npm = which("npm").unwrap();
+    let npm = which("npm").expect("Program 'npm' not found.");
     let child = Command::new(npm).args(&args).spawn().expect("Failed to execute 'npm' command.");
     let mut guard = ChildGuard(child);
     guard.0.wait().unwrap();
