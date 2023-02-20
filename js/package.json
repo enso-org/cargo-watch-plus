@@ -1,0 +1,16 @@
+{
+  "name": "cargo-watch-plus",
+  "version": "1.0.0",
+  "description": "Like cargo-watch, but works on all OSes, based on the Chokidar library.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "author": "Enso Team (contact@enso.org)",
+  "license": "MIT",
+  "dependencies": {
+    "chokidar": "^3.5.3",
+    "ignore": "^5.2.4",
+    "yargs": "^17.7.0"
+  }
+}

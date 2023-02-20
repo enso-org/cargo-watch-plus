@@ -1,0 +1,11 @@
+[package]
+name = "cargo-watch-plus"
+version = "1.0.0"
+edition = "2021"
+
+[dependencies]
+home = "0.5.4"
+
+[build-dependencies]
+home = "0.5.4"
+fs_extra = "1.3.0"
