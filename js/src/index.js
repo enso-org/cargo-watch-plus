@@ -188,7 +188,7 @@ class FileWatch {
             this.gitIgnores.push(new GitIgnore('./default', ['target', '.git', ...argIgnores]))
         }
         if (this.watch == null) {
-            log('Starting a new file watch.')
+            log(`Starting a new file watch at '${args.watch}'.`)
             this.watch = chokidar.watch(args.watch, {
                 followSymlinks: true,
                 persistent: true
