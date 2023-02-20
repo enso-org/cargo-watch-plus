@@ -8,7 +8,7 @@ This library was developed in response to difficulties encountered while using [
 <br/>
 
 ## How this library is made?
-This library is a concise wrapper, comprising less than 200 lines of code, over the following libraries:
+This library is a concise wrapper, comprising less than [300 lines of code](https://github.com/enso-org/cargo-watch-plus/blob/main/js/src/index.js), over the following libraries:
 1. [Chokidar](https://www.npmjs.com/package/chokidar), a highly efficient, cross-platform file watching library, which is utilized in [Brunch](https://brunch.io/),
 [Microsoft's Visual Studio Code](https://github.com/microsoft/vscode),
 [gulp](https://github.com/gulpjs/gulp/),
