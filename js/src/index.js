@@ -11,6 +11,8 @@ const { performance } = require('perf_hooks');
 // === Arg Parser ===
 // ==================
 
+console.log('process.argv', process.argv)
+
 const args = yargs(process.argv.slice(3))
     .usage(
         `https://github.com/enso-org/cargo-watch-plus\n` +
@@ -195,10 +197,8 @@ class FileWatch {
             });
 
             this.watch
-                .on('add', path => this.on('add', path))
-                .on('change', path => this.on('change', path))
-                .on('unlink', path => this.on('unlink', path))
-                .on('ready', () => this.ready());
+                .on('ready', () => this.ready())
+                .on('raw', (event, path, details) => this.on(event, path, details));
         }
     }
 
@@ -215,7 +215,7 @@ class FileWatch {
     isIgnored(file) {
         for (const gitIgnore of this.gitIgnores) {
             let relPath = path.relative(gitIgnore.path, file)
-            if (!(relPath.startsWith('..') && !path.isAbsolute(relPath))) {
+            if (!(relPath.startsWith('..') && !path.isAbsolute(relPath)) && relPath !== '') {
                 if (gitIgnore.ignores(relPath)) {
                     return gitIgnore
                 }
@@ -224,17 +224,27 @@ class FileWatch {
         return null
     }
 
-    on(event, file) {
-        const notReady = !this.isReady
-        const ignored = notReady ? null : this.isIgnored(file)
-        const msg = notReady ? 'INIT ' : ignored != null ? `IGNORED (${ignored.file}) ` : ''
-        const info = `[${event}] ${msg}${file}`
-        if (notReady || ignored != null) {
-            debug(info)
-            return
+    on(event, file, details) {
+        try {
+            if (event !== 'created' && event !== 'deleted' && event !== 'modified') {
+                return
+            }
+            const notReady = !this.isReady
+            const temp = file.endsWith('~')
+            const ignored = notReady ? null : this.isIgnored(file)
+            const msg = notReady ? 'INIT ' : temp ? 'TEMP' : ignored != null ? `IGNORED (${ignored.file}) ` : ''
+            const info = `[${event}] ${msg}${file}`
+            if (notReady || temp || ignored != null) {
+                debug(info)
+                return
+            }
+            logWhy(info)
+            console.log(details)
+            this.runCommands()
+        } catch (e) {
+            console.log(details)
+            console.error(`Error: `, e)
         }
-        logWhy(info)
-        this.runCommands()
     }
 
     runCommands() {
@@ -253,19 +263,32 @@ class FileWatch {
         if(args.clear === true) {
             console.clear()
         }
-        const execCommands = args.exec ?? []
-        const shellCommands = args.shell ?? []
-        const commands = execCommands.map(t => `cargo ${t}`).concat(shellCommands)
-        for (const command of commands) {
-            if(args.noRestart && this.runningCommands.has(command)) {
+        if (args._.length > 0) {
+            const command = args._.join(' ')
+            if (args.noRestart && this.runningCommands.has(command)) {
                 debug(`Command '${command}' is already running, skipping re-run.`)
             } else {
                 debug(`Running '${command}'.`)
                 this.runningCommands.add(command)
-                const cmdArgs = command.split(' ')
-                child_process.spawn(cmdArgs[0], cmdArgs.slice(1) , {stdio: 'inherit', shell: args.useShell}, () =>
+                child_process.spawn(args._[0], args._.slice(1), {stdio: 'inherit', shell: args.useShell}, () =>
                     this.runningCommands.delete(command)
                 )
+            }
+        } else {
+            const execCommands = args.exec ?? []
+            const shellCommands = args.shell ?? []
+            const commands = execCommands.map(t => `cargo ${t}`).concat(shellCommands)
+            for (const command of commands) {
+                if (args.noRestart && this.runningCommands.has(command)) {
+                    debug(`Command '${command}' is already running, skipping re-run.`)
+                } else {
+                    debug(`Running '${command}'.`)
+                    this.runningCommands.add(command)
+                    const cmdArgs = command.split(' ')
+                    child_process.spawn(cmdArgs[0], cmdArgs.slice(1), {stdio: 'inherit', shell: args.useShell}, () =>
+                        this.runningCommands.delete(command)
+                    )
+                }
             }
         }
     }
@@ -277,5 +300,9 @@ class FileWatch {
 
 debug(`Starting cargo-watch-plus with arguments:`)
 debug(args)
-
 new GitIgnoreWatch(new FileWatch());
+
+
+process.on('uncaughtException', (err) => {
+    console.log('Error:', err);
+});
